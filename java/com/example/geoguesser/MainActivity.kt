@@ -1,6 +1,6 @@
 package com.example.geoguesser
 
-import android.nfc.Tag
+
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -11,6 +11,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
+import java.text.NumberFormat
 
 private const val TAG = "MainActivity"
 
@@ -30,7 +31,9 @@ class MainActivity : AppCompatActivity() {
         Question(R.string.question_oceans, true)
     )
 
-    private var currentIndex = 0
+    private var currentIndex = 0;
+    private var incorrectScore = 0;
+    private var correctScore = 0;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,21 +70,46 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkAnswer(userAnswer : Boolean) {
-        val correctAnswer = questionBank[currentIndex].answer
+        val question = questionBank[currentIndex];
+        if (question.hasAnswered)
+            return;
 
-        val messageResId = if(userAnswer == correctAnswer) {
+        question.hasAnswered = true;
+
+        val correctAnswer = question.answer
+
+        val messageResId = if (userAnswer == correctAnswer) {
+            correctScore++
             R.string.correct_toast
         } else {
+            incorrectScore++
             R.string.incorrect_toast
         }
 
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
             .show()
+
+    }
+
+    private fun getScore(): Double {
+        val total = incorrectScore + correctScore;
+        if (total == questionBank.size) {
+            return correctScore.toDouble() / total.toDouble()
+        }
+
+        return -1.0
     }
 
     private fun update() {
         val questionTextResId = questionBank[currentIndex].testResId
         question_text_view.setText(questionTextResId)
+
+        val scorePercent = getScore()
+        if (scorePercent != -1.0) {
+            //Log.d(TAG, scorePercent.toString())
+            val percentage = NumberFormat.getPercentInstance().format(scorePercent)
+            Toast.makeText(this, "You scored $percentage", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onStart() {
