@@ -54,5 +54,12 @@
 
     </LinearLayout>
 
+    <Button
+        android:layout_gravity="bottom|center_horizontal"
+        android:id="@+id/cheat_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/cheat_button" />
 
 </FrameLayout>
