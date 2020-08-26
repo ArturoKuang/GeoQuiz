@@ -3,6 +3,7 @@ package com.example.geoguesser
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -21,6 +22,7 @@ class CheatActivity : AppCompatActivity() {
     private var answerIsTrue = false
     private var shownAnswer = false
     private lateinit var answerTextView: TextView
+    private lateinit var apiTextView: TextView
     private lateinit var showAnswerButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,7 +32,11 @@ class CheatActivity : AppCompatActivity() {
         answerIsTrue = intent.getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false)
         answerTextView = findViewById(R.id.answer_text_view)
         showAnswerButton = findViewById(R.id.show_answer_button)
+        apiTextView = findViewById(R.id.api_text_view)
         shownAnswer = savedInstanceState?.getBoolean(KEY_CHEAT, false) ?: false
+        
+        val apiText = "API Level ${Build.VERSION.SDK_INT}"
+        apiTextView.text = apiText
 
         showAnswerButton.setOnClickListener {
             setAnswerText()
