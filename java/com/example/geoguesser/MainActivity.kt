@@ -4,12 +4,12 @@ package com.example.geoguesser
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.NumberFormat
 
@@ -22,23 +22,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var prevButton: ImageButton
     private lateinit var questionView: TextView
 
-    private val questionBank = listOf(
-        Question(R.string.question_australlia, true),
-        Question(R.string.question_africa, true),
-        Question(R.string.question_americas, false),
-        Question(R.string.question_asia, false),
-        Question(R.string.question_mideast, true),
-        Question(R.string.question_oceans, true)
-    )
-
-    private var currentIndex = 0;
     private var incorrectScore = 0;
     private var correctScore = 0;
+
+    private val quizViewModel: QuizViewModel by lazy {
+        ViewModelProvider(this).get(QuizViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Log.d(TAG, "onCreate(Bundle?) called")
 
         trueButton = findViewById(R.id.true_button)
         falseButton = findViewById(R.id.false_button)
@@ -55,14 +48,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         nextButton.setOnClickListener {
-            currentIndex = (currentIndex + 1) % questionBank.size
+            quizViewModel.moveToNext()
             update()
         }
 
         prevButton.setOnClickListener {
-            currentIndex = (currentIndex - 1)
-            if(currentIndex < 0)
-                currentIndex = questionBank.size - 1
+            quizViewModel.moveToPrev()
             update()
         }
 
@@ -70,19 +61,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkAnswer(userAnswer : Boolean) {
-        val question = questionBank[currentIndex];
-        if (question.hasAnswered)
+        if (quizViewModel.currentQuestionHasAnswered)
             return;
 
-        question.hasAnswered = true;
+        quizViewModel.currentQuestionHasAnswered = true
 
-        val correctAnswer = question.answer
-
-        val messageResId = if (userAnswer == correctAnswer) {
-            correctScore++
+        val messageResId = if (userAnswer == quizViewModel.currentQuestionAnswer) {
+            quizViewModel.correctAnswer++;
             R.string.correct_toast
         } else {
-            incorrectScore++
             R.string.incorrect_toast
         }
 
@@ -92,21 +79,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getScore(): Double {
-        val total = incorrectScore + correctScore;
-        if (total == questionBank.size) {
-            return correctScore.toDouble() / total.toDouble()
-        }
-
-        return -1.0
+        return quizViewModel.correctAnswer.toDouble() / quizViewModel.size.toDouble()
     }
 
     private fun update() {
-        val questionTextResId = questionBank[currentIndex].testResId
-        question_text_view.setText(questionTextResId)
+        question_text_view.setText(quizViewModel.currentQuestionText)
 
         val scorePercent = getScore()
-        if (scorePercent != -1.0) {
-            //Log.d(TAG, scorePercent.toString())
+        if (quizViewModel.allAnswered) {
             val percentage = NumberFormat.getPercentInstance().format(scorePercent)
             Toast.makeText(this, "You scored $percentage", Toast.LENGTH_SHORT).show()
         }
