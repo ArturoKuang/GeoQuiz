@@ -1,5 +1,6 @@
 package com.example.geoguesser
 
+import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 
@@ -8,6 +9,7 @@ private const val TAG = "QuizViewModel"
 class QuizViewModel : ViewModel() {
     var currentIndex = 0
     var correctAnswer = 0
+    var isCheater = false
 
     private val questionBank = listOf(
         Question(R.string.question_australlia, true),
@@ -53,6 +55,4 @@ class QuizViewModel : ViewModel() {
         if (currentIndex < 0)
             currentIndex = questionBank.size - 1
     }
-
-
 }

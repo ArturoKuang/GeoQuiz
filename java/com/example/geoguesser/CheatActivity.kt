@@ -1,5 +1,6 @@
 package com.example.geoguesser
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +11,9 @@ import java.security.AccessControlContext
 
 private const val EXTRA_ANSWER_IS_TRUE =
     "com.example.geogusseer.answer_is_true"
+
+const val EXTRA_ANSWER_SHOWN =
+    "com.example.geogusseer.answer_shown"
 
 class CheatActivity : AppCompatActivity() {
     private var answerIsTrue = false
@@ -30,7 +34,15 @@ class CheatActivity : AppCompatActivity() {
                 else -> R.string.false_button
             }
             answerTextView.setText(answerText)
+            setAnswerShowResult(true)
         }
+    }
+
+    private fun setAnswerShowResult(isAnswerShown: Boolean) {
+        val data = Intent().apply {
+            putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown)
+        }
+        setResult(Activity.RESULT_OK, data)
     }
 
     companion object {

@@ -1,6 +1,7 @@
 package com.example.geoguesser
 
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -16,6 +17,7 @@ import java.text.NumberFormat
 
 private const val TAG = "MainActivity"
 private const val KEY_INDEX = "index"
+private const val REQUEST_CODE_CHEAT = 0
 
 class MainActivity : AppCompatActivity() {
     private lateinit var trueButton: Button
@@ -67,7 +69,7 @@ class MainActivity : AppCompatActivity() {
         cheatButton.setOnClickListener {
             val answerIsTrue = quizViewModel.currentQuestionAnswer
             val intent = CheatActivity.newIntent(this@MainActivity, answerIsTrue)
-            startActivity(intent)
+            startActivityForResult(intent, REQUEST_CODE_CHEAT)
         }
 
         update()
@@ -78,12 +80,15 @@ class MainActivity : AppCompatActivity() {
             return;
 
         quizViewModel.currentQuestionHasAnswered = true
+        val correctAnswer: Boolean = quizViewModel.currentQuestionAnswer
 
-        val messageResId = if (userAnswer == quizViewModel.currentQuestionAnswer) {
-            quizViewModel.correctAnswer++;
-            R.string.correct_toast
-        } else {
-            R.string.incorrect_toast
+        val messageResId = when {
+            quizViewModel.isCheater -> R.string.judgement_toast
+            userAnswer == correctAnswer -> {
+                quizViewModel.correctAnswer++;
+                R.string.correct_toast
+            }
+            else -> R.string.incorrect_toast
         }
 
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
@@ -109,5 +114,20 @@ class MainActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
         Log.i(KEY_INDEX, "onSavedInstanceState")
         outState.putInt(KEY_INDEX, quizViewModel.currentIndex)
+    }
+
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode != Activity.RESULT_OK) {
+            return
+        }
+
+        if (requestCode == REQUEST_CODE_CHEAT) {
+            quizViewModel.isCheater = data?.getBooleanExtra(EXTRA_ANSWER_SHOWN, false) ?: false
+        }
     }
 }
