@@ -15,32 +15,46 @@ private const val EXTRA_ANSWER_IS_TRUE =
 const val EXTRA_ANSWER_SHOWN =
     "com.example.geogusseer.answer_shown"
 
+private const val KEY_CHEAT = "cheat"
+
 class CheatActivity : AppCompatActivity() {
     private var answerIsTrue = false
+    private var shownAnswer = false
     private lateinit var answerTextView: TextView
     private lateinit var showAnswerButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cheat)
-        answerIsTrue = intent.getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false)
 
+        answerIsTrue = intent.getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false)
         answerTextView = findViewById(R.id.answer_text_view)
         showAnswerButton = findViewById(R.id.show_answer_button)
+        shownAnswer = savedInstanceState?.getBoolean(KEY_CHEAT, false) ?: false
 
         showAnswerButton.setOnClickListener {
-            val answerText = when {
-                answerIsTrue -> R.string.true_button
-                else -> R.string.false_button
-            }
-            answerTextView.setText(answerText)
-            setAnswerShowResult(true)
+            setAnswerText()
+            shownAnswer = true
+            setAnswerShowResult()
+        }
+
+        if (shownAnswer) {
+            setAnswerText()
+            setAnswerShowResult()
         }
     }
 
-    private fun setAnswerShowResult(isAnswerShown: Boolean) {
+    private fun setAnswerText() {
+        val answerText = when {
+            answerIsTrue -> R.string.true_button
+            else -> R.string.false_button
+        }
+        answerTextView.setText(answerText)
+    }
+
+    private fun setAnswerShowResult() {
         val data = Intent().apply {
-            putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown)
+            putExtra(EXTRA_ANSWER_SHOWN, shownAnswer)
         }
         setResult(Activity.RESULT_OK, data)
     }
@@ -51,5 +65,10 @@ class CheatActivity : AppCompatActivity() {
                 putExtra(EXTRA_ANSWER_IS_TRUE, answerIsTrue)
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(KEY_CHEAT, shownAnswer)
     }
 }

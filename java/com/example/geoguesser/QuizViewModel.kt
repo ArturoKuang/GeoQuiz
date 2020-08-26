@@ -9,7 +9,6 @@ private const val TAG = "QuizViewModel"
 class QuizViewModel : ViewModel() {
     var currentIndex = 0
     var correctAnswer = 0
-    var isCheater = false
 
     private val questionBank = listOf(
         Question(R.string.question_australlia, true),
@@ -31,6 +30,13 @@ class QuizViewModel : ViewModel() {
         set(value) {
             questionBank[currentIndex].hasAnswered = value
         }
+
+    var currentQuestionHasCheated: Boolean
+        get() = questionBank[currentIndex].hasCheated
+        set(value) {
+            questionBank[currentIndex].hasCheated = value
+        }
+
 
     val size: Int
         get() = questionBank.size
