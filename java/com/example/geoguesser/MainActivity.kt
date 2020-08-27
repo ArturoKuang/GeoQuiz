@@ -70,7 +70,9 @@ class MainActivity : AppCompatActivity() {
 
         cheatButton.setOnClickListener { view ->
             val answerIsTrue = quizViewModel.currentQuestionAnswer
-            val intent = CheatActivity.newIntent(this@MainActivity, answerIsTrue)
+            val cheatNumber = quizViewModel.cheatNumber
+
+            val intent = CheatActivity.newIntent(this@MainActivity, answerIsTrue, cheatNumber)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 val options =
@@ -138,6 +140,8 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == REQUEST_CODE_CHEAT) {
             quizViewModel.currentQuestionHasCheated =
                 data?.getBooleanExtra(EXTRA_ANSWER_SHOWN, false) ?: false
+            quizViewModel.cheatNumber =
+                data?.getIntExtra(EXTRA_CHEAT_NUM, 0) ?: 0
         }
     }
 }
